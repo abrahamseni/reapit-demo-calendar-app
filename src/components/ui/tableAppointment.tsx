@@ -5,7 +5,7 @@ import { reapitConnectBrowserSession } from "../../core/connect-session";
 import { PropertyModel } from "@reapit/foundations-ts-definitions";
 import { Loader, Card, Subtitle, Modal, BodyText } from "@reapit/elements";
 import { useGetNegotiatorById } from "../../platform-api/negotiators";
-import { Calendar, momentLocalizer } from "react-big-calendar";
+import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import moment from "moment";
 import { modalBody } from "./__styles__/styles";
 import { CalendarEventType } from "../types";
@@ -101,10 +101,12 @@ const TableAppointment = (props: PropertyModel) => {
               selectable
               localizer={localizer}
               defaultDate={moment().toDate()}
-              defaultView="month"
+              defaultView={Views.MONTH}
               style={{ height: "100%" }}
-              views={["month"]}
+              views={["month", "week", "day"]}
               events={events}
+              step={30}
+              timeslots={12}
             />
           </div>
         )}
