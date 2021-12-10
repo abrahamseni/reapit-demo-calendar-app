@@ -12,12 +12,6 @@
     "@reapit/elements": "^3.7.4",
     "@reapit/foundations-ts-definitions": "^1.3.25",
     "@types/enzyme": "^3.10.9",
-    "@types/jest": "^26.0.24",
-    "@types/node": "^14.17.5",
-    "@types/react": "^17.0.14",
-    "@types/react-dom": "^17.0.9",
-    "@types/react-router": "^5.1.16",
-    "@types/react-router-dom": "^5.1.8",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
     "axios": "^0.24.0",
     "babel-loader": "8.1.0",
@@ -29,18 +23,27 @@
     "enzyme": "^3.11.0",
     "eslint": "^7.11.0",
     "jest-config": "^27.0.6",
+    "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-app-rewired": "^2.1.8",
+    "react-big-calendar": "^0.38.1",
     "react-dom": "^17.0.2",
     "react-query": "^3.34.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
-    "serve": "^12.0.0",
-    "typescript": "^4.3.5"
+    "serve": "^12.0.0"
   },
   "devDependencies": {
-    "cypress": "^9.1.1"
+    "@types/jest": "^26.0.24",
+    "@types/node": "^14.17.5",
+    "@types/react": "^17.0.14",
+    "@types/react-big-calendar": "^0.36.2",
+    "@types/react-dom": "^17.0.9",
+    "@types/react-router": "^5.1.16",
+    "@types/react-router-dom": "^5.1.8",
+    "cypress": "^9.1.1",
+    "typescript": "^4.3.5"
   },
   "scripts": {
     "start": "cross-env PORT=8080 react-app-rewired start",
