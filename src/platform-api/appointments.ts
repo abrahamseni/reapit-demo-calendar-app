@@ -19,7 +19,7 @@ export const useGetAppointmentByNegotiator = (
         `${window.reapit.config.platformApiUrl}${URLS.APPOINTMENTS}/?sortBy=-start&negotiatorId=${queryKey[1]}`,
         {
           headers: {
-            Authorization: `Bearer ${queryKey[3].accessToken}`,
+            Authorization: `Bearer ${queryKey[2].accessToken}`,
           },
         }
       );
