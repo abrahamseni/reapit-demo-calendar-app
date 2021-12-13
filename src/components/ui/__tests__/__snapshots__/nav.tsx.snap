@@ -24,3 +24,5 @@ exports[`Menu should match a snapshot 1`] = `
   }
 />
 `;
+
+exports[`Nav should match a snapshot 1`] = `ShallowWrapper {}`;
