@@ -2,6 +2,7 @@ import * as React from "react";
 import {
   Pagination,
   Snack,
+  SnackProvider,
   InputGroup,
   Title,
   Input,
@@ -10,66 +11,19 @@ import {
   RowProps,
   Loader,
 } from "@reapit/elements";
-import {
-  getAllProperties,
-  getPropertiesByAddress,
-} from "../../platform-api/properties";
 import { useGetPropertiesByAddress } from "../../platform-api/properties";
 import { useReapitConnect } from "@reapit/connect-session";
 import { reapitConnectBrowserSession } from "../../core/connect-session";
 import { createTableRows } from "../../utils/helpers";
+import { Space } from "../utils/space";
 
 interface Props {}
 
 const Calendar = (props: Props) => {
   const { connectSession } = useReapitConnect(reapitConnectBrowserSession);
   const [address, setAddress] = React.useState("");
-  // const [page, setPage] = React.useState({
-  //   current: 1,
-  //   propertiesPerPage: 25,
-  // });
   const [pageNumber, setPageNumber] = React.useState(1);
   const [rows, setRows] = React.useState<RowProps[]>([]);
-  // const [loading, setLoading] = React.useState<boolean>(false);
-  // const [error, setError] = React.useState<unknown | string>("");
-
-  // // render all properties on first load
-  // React.useEffect(() => {
-  //   const fetchAllProperties = async () => {
-  //     if (!connectSession) return;
-  //     setLoading(true);
-  //     try {
-  //       const data = await getAllProperties(connectSession);
-  //       setRows(createTableRows(data));
-  //     } catch (error) {
-  //       console.error(error);
-  //       setError("Error getting properties data");
-  //     }
-  //     setLoading(false);
-  //   };
-  //   fetchAllProperties();
-  // }, [connectSession]);
-
-  // // render properties based on address and or page change
-  // React.useEffect(() => {
-  //   const fetchPropertiesByAddress = async () => {
-  //     if (!connectSession) return;
-  //     setLoading(true);
-  //     try {
-  //       const data = await getPropertiesByAddress(
-  //         connectSession,
-  //         page.current,
-  //         address
-  //       );
-  //       setRows(createTableRows(data));
-  //     } catch (error) {
-  //       console.error(error);
-  //       setError("Error getting properties data");
-  //     }
-  //     setLoading(false);
-  //   };
-  //   fetchPropertiesByAddress();
-  // }, [page, address]);
 
   const propertiesResult = useGetPropertiesByAddress(connectSession, {
     pageNumber,
@@ -85,7 +39,7 @@ const Calendar = (props: Props) => {
 
   const renderTable = () => {
     if (status === "loading") {
-      return <Loader label="loader" />;
+      return <Loader label="In progress..." />;
     } else if (status === "error") {
       return (
         <Snack intent="danger" icon="errorSolidSystem">
@@ -108,18 +62,17 @@ const Calendar = (props: Props) => {
   };
 
   return (
-    <div>
+    <SnackProvider>
       <Title>Calendar App</Title>
-      <InputGroup>
-        <Label>Search by Address</Label>
-        <Input
-          type="search"
-          placeholder="London"
-          onChange={(event) => setAddress(event.target.value)}
-        />
-      </InputGroup>
+      <InputGroup
+        label="Search by Address"
+        type="search"
+        placeholder="London"
+        onChange={(event) => setAddress(event.target.value)}
+      />
+      <Space height="16px" />
       {renderTable()}
-    </div>
+    </SnackProvider>
   );
 };
 
