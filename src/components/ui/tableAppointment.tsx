@@ -5,15 +5,8 @@ import { reapitConnectBrowserSession } from "../../core/connect-session";
 import { PropertyModel } from "@reapit/foundations-ts-definitions";
 import { Loader, Card, BodyText, useSnack, useModal } from "@reapit/elements";
 import { useGetNegotiatorById } from "../../platform-api/negotiators";
-import {
-  Calendar,
-  Views,
-  SlotInfo,
-  dateFnsLocalizer,
-  Event,
-} from "react-big-calendar";
-import { modalBody } from "./__styles__/styles";
-import { compareAsc, format, parse, startOfWeek, getDay } from "date-fns";
+import { SlotInfo, Event } from "react-big-calendar";
+import { compareAsc } from "date-fns";
 import AppointmentModal from "../utils/appointmentModal";
 import CalendarModalBody from "./calendarModalBody";
 
@@ -145,11 +138,13 @@ const TableAppointment = (props: PropertyModel) => {
         ) : scheduleFetchStatus === "error" ? (
           <BodyText>Error fetching Calendar</BodyText>
         ) : (
-          <CalendarModalBody
-            events={events}
-            reservedAppointment={reservedAppointment}
-            openEditAppointment={openEditAppointment}
-          />
+          events && (
+            <CalendarModalBody
+              events={events}
+              reservedAppointment={reservedAppointment}
+              openEditAppointment={openEditAppointment}
+            />
+          )
         )}
       </CalendarModal>
       <ReservedModal
