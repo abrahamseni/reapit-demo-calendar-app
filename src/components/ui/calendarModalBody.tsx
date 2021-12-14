@@ -1,10 +1,20 @@
 import * as React from "react";
-import { Calendar, Views, dateFnsLocalizer } from "react-big-calendar";
+import {
+  Event,
+  Calendar,
+  Views,
+  dateFnsLocalizer,
+  SlotInfo,
+} from "react-big-calendar";
 import { modalBody } from "./__styles__/styles";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import enAU from "date-fns/esm/locale/en-AU";
 
-interface Props {}
+interface Props {
+  events: Event[];
+  reservedAppointment: (event: SlotInfo) => void;
+  openEditAppointment: (event: Event) => void;
+}
 
 const localizer = dateFnsLocalizer({
   format,
@@ -18,7 +28,7 @@ const CalendarModalBody = ({
   events,
   reservedAppointment,
   openEditAppointment,
-}) => {
+}: Props) => {
   return (
     <div className={modalBody}>
       <Calendar
