@@ -44,7 +44,6 @@ export const useGetAppointmentByNegotiator = (
 };
 
 export const usePostNewAppointment = () => {
-  const [data, setData] = React.useState();
   const queryClient = useQueryClient();
 
   const actionPostAppointment = async ({
@@ -54,7 +53,6 @@ export const usePostNewAppointment = () => {
     session: ReapitConnectSession;
     body: any;
   }) => {
-    // axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
     return axios
       .post(
         `${window.reapit.config.platformApiUrl}${URLS.APPOINTMENTS}/`,
@@ -68,14 +66,50 @@ export const usePostNewAppointment = () => {
       .catch((err) => console.error(err));
   };
 
-  // @ts-ignore
   const postAppointment = useMutation(actionPostAppointment, {
     onError: (error) => console.log(error),
-    // @ts-ignore
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries(["getAppointmentsByNegotiator"]);
     },
   });
 
-  return [postAppointment, data];
+  return [postAppointment];
+};
+
+export const useEditAppointment = () => {
+  const queryClient = useQueryClient();
+
+  const actionEditAppointment = async ({
+    session,
+    body,
+    etag,
+    id,
+  }: {
+    session: ReapitConnectSession;
+    body: any;
+    etag: string;
+    id: string;
+  }) => {
+    return axios
+      .patch(
+        `${window.reapit.config.platformApiUrl}${URLS.APPOINTMENTS}/${id}`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            "If-Match": etag,
+          },
+        }
+      )
+      .catch((err) => console.error(err));
+  };
+
+  const editAppointment = useMutation(actionEditAppointment, {
+    onError: (error) => console.log(error),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["getAppointmentsByNegotiator"]);
+    },
+  });
+
+  return [editAppointment];
 };
