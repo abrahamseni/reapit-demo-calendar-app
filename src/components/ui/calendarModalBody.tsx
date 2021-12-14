@@ -10,7 +10,7 @@ import { modalBody } from "./__styles__/styles";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import enAU from "date-fns/esm/locale/en-AU";
 
-interface Props {
+interface CalendarProps {
   events: Event[];
   reservedAppointment: (event: SlotInfo) => void;
   openEditAppointment: (event: Event) => void;
@@ -24,11 +24,11 @@ const localizer = dateFnsLocalizer({
   locales: { "en-AU": enAU },
 });
 
-const CalendarModalBody = ({
+const CalendarModalBody: React.FC<CalendarProps> = ({
   events,
   reservedAppointment,
   openEditAppointment,
-}: Props) => {
+}) => {
   return (
     <div className={modalBody}>
       <Calendar

@@ -19,7 +19,7 @@ import { Space } from "../utils/space";
 
 interface Props {}
 
-const Calendar = (props: Props) => {
+const Calendar: React.FC<Props> = () => {
   const { connectSession } = useReapitConnect(reapitConnectBrowserSession);
   const [address, setAddress] = React.useState("");
   const [pageNumber, setPageNumber] = React.useState(1);

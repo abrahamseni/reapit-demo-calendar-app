@@ -19,24 +19,24 @@ import {
   usePostNewAppointment,
   useEditAppointment,
 } from "../../platform-api/appointments";
-import { useReapitConnect } from "@reapit/connect-session";
-import { reapitConnectBrowserSession } from "../../core/connect-session";
+// import { useReapitConnect } from "@reapit/connect-session";
+// import { reapitConnectBrowserSession } from "../../core/connect-session";
 
-interface Props {
+interface AppointmentModalProps {
   property: PropertyModel;
   reservedEvent: Event;
   closeReservedModal: () => void;
   type: "new" | "edit";
 }
 
-const AppointmentModal = ({
+const AppointmentModal: React.FC<AppointmentModalProps> = ({
   property,
   reservedEvent,
   closeReservedModal,
   type,
-}: Props) => {
-  const { connectSession } = useReapitConnect(reapitConnectBrowserSession);
-  const appointmentConfigTypes = useGetAppointmentConfigType();
+}) => {
+  const { connectSession, appointmentConfigTypes } =
+    useGetAppointmentConfigType();
   const [createReservedAppointment] = usePostNewAppointment();
   const [editAppointment] = useEditAppointment();
   const [reservedEventTitle, setReservedEventTitle] = React.useState<
@@ -88,12 +88,6 @@ const AppointmentModal = ({
         onSuccess: (data) => console.log("success", data),
       }
     );
-    // setEvents((previousEvent) => {
-    //   if (reservedEvent) {
-    //     reservedEvent.title = reservedEventTitle;
-    //     return previousEvent?.concat(reservedEvent);
-    //   }
-    // });
     closeReservedModal();
   };
 
@@ -194,7 +188,7 @@ const AppointmentModal = ({
           }
         }}
       >
-        {type === "edit" ? "Edit" : "Reserved"}
+        {type === "edit" ? "Confirm Edit" : "Reserved"}
       </Button>
     </>
   );
