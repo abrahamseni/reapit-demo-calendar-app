@@ -2,7 +2,7 @@ import * as React from "react";
 import { ReapitConnectSession } from "@reapit/connect-session";
 import { AppointmentModelPagedResult } from "@reapit/foundations-ts-definitions";
 import { URLS } from "../constants/api";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import axios from "../axios";
 
 export const useGetAppointmentByNegotiator = (
@@ -45,6 +45,7 @@ export const useGetAppointmentByNegotiator = (
 
 export const usePostNewAppointment = () => {
   const [data, setData] = React.useState();
+  const queryClient = useQueryClient();
 
   const actionPostAppointment = async ({
     session,
@@ -72,7 +73,7 @@ export const usePostNewAppointment = () => {
     onError: (error) => console.log(error),
     // @ts-ignore
     onSuccess: (data) => {
-      console.log("data:", data);
+      queryClient.invalidateQueries(["getAppointmentsByNegotiator"]);
     },
   });
 

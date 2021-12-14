@@ -25,14 +25,12 @@ import {
 import { useGetNegotiatorById } from "../../platform-api/negotiators";
 import {
   Calendar,
-  momentLocalizer,
   Views,
   SlotInfo,
   dateFnsLocalizer,
+  Event,
 } from "react-big-calendar";
-import moment from "moment";
 import { modalBody } from "./__styles__/styles";
-import { CalendarEventType } from "../../types/events";
 import { compareAsc, format, parse, startOfWeek, getDay, add } from "date-fns";
 import enAU from "date-fns/esm/locale/en-AU";
 import { formatDate } from "../../utils/formats";
@@ -74,8 +72,8 @@ const TableAppointment = (props: PropertyModel) => {
     error: scheduleError,
   } = negotiatorSchedule;
 
-  const [events, setEvents] = React.useState<CalendarEventType[]>();
-  const [reservedEvent, setReservedEvent] = React.useState<CalendarEventType>();
+  const [events, setEvents] = React.useState<Event[]>();
+  const [reservedEvent, setReservedEvent] = React.useState<Event>();
   const [reservedEventTitle, setReservedEventTitle] = React.useState<
     string | undefined
   >();
@@ -95,9 +93,9 @@ const TableAppointment = (props: PropertyModel) => {
     if (schedule) {
       const newEvents = schedule._embedded?.map((s) => {
         return {
-          start: s.start ?? "",
-          end: s.end ?? "",
-          title: s.description ?? "",
+          start: new Date(s.start ?? ""),
+          end: new Date(s.end ?? ""),
+          title: s.description === "" ? "Template Title" : "",
         };
       });
       setEvents(newEvents);
@@ -109,11 +107,10 @@ const TableAppointment = (props: PropertyModel) => {
       snackError("Can't reserved time before today", 3000);
       return;
     }
-    console.log("createEvent", event);
     if (event) {
       setReservedEvent({
-        start: event.start as string,
-        end: event.end as string,
+        start: new Date(event.start),
+        end: new Date(event.end),
         title: "applicant name here?",
       });
       openReservedModal();
@@ -123,12 +120,11 @@ const TableAppointment = (props: PropertyModel) => {
   const saveConfirmedAppointment = () => {
     if (!connectSession) return;
 
-    //! need to post it to Appointments API
     const body = JSON.stringify({
       start: reservedEvent?.start,
       end: reservedEvent?.end,
       followUpOn: formatDate(
-        add(new Date(reservedEvent?.end as string), { weeks: 2 }),
+        add(new Date(reservedEvent?.end ?? ""), { weeks: 2 }),
         "yyyy-MM-dd"
       ),
       typeId: reservedEventViewType ?? "VW",
@@ -163,13 +159,18 @@ const TableAppointment = (props: PropertyModel) => {
         onSuccess: (data) => console.log("success", data),
       }
     );
-    // setEvents((previousEvent) => {
-    //   if (reservedEvent) {
-    //     reservedEvent.title = reservedEventTitle
-    //     return previousEvent?.concat(reservedEvent);
-    //   }
-    // });
+    setEvents((previousEvent) => {
+      if (reservedEvent) {
+        reservedEvent.title = reservedEventTitle;
+        return previousEvent?.concat(reservedEvent);
+      }
+    });
     closeReservedModal();
+  };
+
+  const editReservedAppointment = (event: Event) => {
+    console.log(event);
+    console.log();
   };
 
   return (
@@ -219,7 +220,7 @@ const TableAppointment = (props: PropertyModel) => {
             <Calendar
               selectable
               localizer={localizer}
-              defaultDate={moment().toDate()}
+              defaultDate={new Date(Date.now())}
               defaultView={Views.MONTH}
               style={{ height: "100%" }}
               views={["month", "week", "day"]}
@@ -227,6 +228,8 @@ const TableAppointment = (props: PropertyModel) => {
               step={30}
               timeslots={12}
               onSelectSlot={reservedAppointment}
+              onSelectEvent={editReservedAppointment}
+              dayLayoutAlgorithm="no-overlap"
             />
           </div>
         )}
@@ -242,7 +245,7 @@ const TableAppointment = (props: PropertyModel) => {
             </BodyText>
             <BodyText hasGreyText>
               From: {formatDate(reservedEvent.start, "HH:mm a")} -{" "}
-              {formatDate(reservedEvent.end, "HH:mm a")}
+              {formatDate(reservedEvent.end ?? "", "HH:mm a")}
             </BodyText>
           </>
         )}
