@@ -29,7 +29,7 @@ export const Authenticated: FC<AuthenticatedProps> = () => {
   //     fetchAppoinmentConfigs();
   //   }
   // }, [connectSession]);
-  const appointmentConfigTypes = useGetAppointmentConfigType();
+  const { appointmentConfigTypes } = useGetAppointmentConfigType();
 
   console.log("Appointment Config Types are: ", appointmentConfigTypes);
   return (

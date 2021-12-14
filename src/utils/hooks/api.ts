@@ -76,5 +76,5 @@ export const useGetAppointmentConfigType = () => {
     }
   }, [connectSession]);
 
-  return appointmentConfigTypes;
+  return { connectSession, appointmentConfigTypes };
 };
