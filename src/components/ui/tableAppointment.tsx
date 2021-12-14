@@ -1,27 +1,9 @@
 import * as React from "react";
-import {
-  useGetAppointmentByNegotiator,
-  usePostNewAppointment,
-} from "../../platform-api/appointments";
+import { useGetAppointmentByNegotiator } from "../../platform-api/appointments";
 import { useReapitConnect } from "@reapit/connect-session";
 import { reapitConnectBrowserSession } from "../../core/connect-session";
-import {
-  PropertyModel,
-  ListItemModel,
-} from "@reapit/foundations-ts-definitions";
-import {
-  Button,
-  Loader,
-  Card,
-  Subtitle,
-  Modal,
-  BodyText,
-  useSnack,
-  InputGroup,
-  SearchableDropdown,
-  SearchableDropdownSearchLabel,
-  useModal,
-} from "@reapit/elements";
+import { PropertyModel } from "@reapit/foundations-ts-definitions";
+import { Loader, Card, BodyText, useSnack, useModal } from "@reapit/elements";
 import { useGetNegotiatorById } from "../../platform-api/negotiators";
 import {
   Calendar,
@@ -31,20 +13,9 @@ import {
   Event,
 } from "react-big-calendar";
 import { modalBody } from "./__styles__/styles";
-import { compareAsc, format, parse, startOfWeek, getDay, add } from "date-fns";
-import enAU from "date-fns/esm/locale/en-AU";
-import { formatDate } from "../../utils/formats";
-import { useGetAppointmentConfigType } from "../../utils/hooks/api";
-import { Space } from "../utils/space";
-
-// const localizer = momentLocalizer(moment);
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales: { "en-AU": enAU },
-});
+import { compareAsc, format, parse, startOfWeek, getDay } from "date-fns";
+import AppointmentModal from "../utils/appointmentModal";
+import CalendarModalBody from "./calendarModalBody";
 
 const TableAppointment = (props: PropertyModel) => {
   const {
@@ -74,20 +45,14 @@ const TableAppointment = (props: PropertyModel) => {
 
   const [events, setEvents] = React.useState<Event[]>();
   const [reservedEvent, setReservedEvent] = React.useState<Event>();
-  const [reservedEventTitle, setReservedEventTitle] = React.useState<
-    string | undefined
-  >();
-  const [reservedEventViewType, setReservedEventViewType] = React.useState<
-    string | undefined
-  >();
-  const [createReservedAppointment, data] = usePostNewAppointment();
+
   const {
     Modal: ReservedModal,
     openModal: openReservedModal,
     closeModal: closeReservedModal,
   } = useModal("root");
   const { error: snackError } = useSnack();
-  const appointmentConfigTypes = useGetAppointmentConfigType();
+  // const appointmentConfigTypes = useGetAppointmentConfigType();
 
   React.useEffect(() => {
     if (schedule) {
@@ -95,7 +60,12 @@ const TableAppointment = (props: PropertyModel) => {
         return {
           start: new Date(s.start ?? ""),
           end: new Date(s.end ?? ""),
-          title: s.description === "" ? "Template Title" : "",
+          title: s.description === "" ? "Template Title" : s.description,
+          resource: {
+            tag: s._eTag,
+            id: s.id,
+            type: "edit",
+          },
         };
       });
       setEvents(newEvents);
@@ -112,65 +82,24 @@ const TableAppointment = (props: PropertyModel) => {
         start: new Date(event.start),
         end: new Date(event.end),
         title: "applicant name here?",
+        resource: {
+          type: "new",
+        },
       });
       openReservedModal();
     }
   };
 
-  const saveConfirmedAppointment = () => {
-    if (!connectSession) return;
-
-    const body = JSON.stringify({
-      start: reservedEvent?.start,
-      end: reservedEvent?.end,
-      followUpOn: formatDate(
-        add(new Date(reservedEvent?.end ?? ""), { weeks: 2 }),
-        "yyyy-MM-dd"
-      ),
-      typeId: reservedEventViewType ?? "VW",
-      description: reservedEventTitle ?? "",
-      organiserId: props.negotiatorId,
-      negotiatorIds: [props.negotiatorId],
-      officeIds: props.officeIds,
-      attendee: {
-        id: "MKT210196",
-        type: "applicant",
-      },
-      propertyId: props.id,
-      accompanied: true,
-      negotiatorConfirmed: false,
-      attendeeConfirmed: true,
-      propertyConfirmed: true,
-      virtual: false,
-      recurrence: {
-        interval: 0,
-        type: null,
-        until: null,
-      },
-      metadata: {
-        CustomField1: "CustomValue1",
-        CustomField2: true,
-      },
-    });
-
-    createReservedAppointment?.mutate(
-      { session: connectSession, body },
-      {
-        onSuccess: (data) => console.log("success", data),
-      }
-    );
-    setEvents((previousEvent) => {
-      if (reservedEvent) {
-        reservedEvent.title = reservedEventTitle;
-        return previousEvent?.concat(reservedEvent);
-      }
-    });
-    closeReservedModal();
-  };
-
-  const editReservedAppointment = (event: Event) => {
-    console.log(event);
-    console.log();
+  const openEditAppointment = (event: Event) => {
+    if (event) {
+      setReservedEvent({
+        start: event.start,
+        end: event.end,
+        title: event.title,
+        resource: event.resource,
+      });
+      openReservedModal();
+    }
   };
 
   return (
@@ -216,71 +145,26 @@ const TableAppointment = (props: PropertyModel) => {
         ) : scheduleFetchStatus === "error" ? (
           <BodyText>Error fetching Calendar</BodyText>
         ) : (
-          <div className={modalBody}>
-            <Calendar
-              selectable
-              localizer={localizer}
-              defaultDate={new Date(Date.now())}
-              defaultView={Views.MONTH}
-              style={{ height: "100%" }}
-              views={["month", "week", "day"]}
-              events={events}
-              step={30}
-              timeslots={12}
-              onSelectSlot={reservedAppointment}
-              onSelectEvent={editReservedAppointment}
-              dayLayoutAlgorithm="no-overlap"
-            />
-          </div>
+          <CalendarModalBody
+            events={events}
+            reservedAppointment={reservedAppointment}
+            openEditAppointment={openEditAppointment}
+          />
         )}
       </CalendarModal>
       <ReservedModal
-        title={`Reserved an Appointment for ${props.address?.buildingName}`}
+        title={`${
+          reservedEvent?.resource.type === "edit" ? "Edit" : "Make New"
+        } Appointment for ${props.address?.buildingName}`}
       >
-        {reservedEvent && reservedEvent.start && (
-          <>
-            <BodyText hasBoldText>{reservedEvent?.title}</BodyText>
-            <BodyText hasGreyText>
-              Date: {formatDate(reservedEvent.start, "MMMM dd, yyyy")}
-            </BodyText>
-            <BodyText hasGreyText>
-              From: {formatDate(reservedEvent.start, "HH:mm a")} -{" "}
-              {formatDate(reservedEvent.end ?? "", "HH:mm a")}
-            </BodyText>
-          </>
+        {reservedEvent && reservedEvent.resource.type && (
+          <AppointmentModal
+            property={props}
+            reservedEvent={reservedEvent}
+            closeReservedModal={closeReservedModal}
+            type={reservedEvent.resource.type}
+          />
         )}
-        <Space height="12px" />
-        <InputGroup
-          label="Title"
-          type="text"
-          icon="houseInfographic"
-          onChange={(event) => setReservedEventTitle(event.target.value)}
-        />
-        <Space height="12px" />
-        <SearchableDropdownSearchLabel>
-          Appointment Type:
-        </SearchableDropdownSearchLabel>
-        <SearchableDropdown<ListItemModel>
-          getResults={async (query) => {
-            return new Promise((resolve) => {
-              resolve(
-                appointmentConfigTypes.filter((type) =>
-                  type.value?.toLowerCase().includes(query.trim())
-                )
-              );
-            });
-          }}
-          getResultValue={(result) => (result.id ? result.id : "")}
-          getResultLabel={(result) => (result.value ? result.value : "")}
-          onChange={(event) => setReservedEventViewType(event.target.value)}
-        />
-        <Space height="24px" />
-        <Button intent="neutral" onClick={closeReservedModal}>
-          Cancel
-        </Button>
-        <Button intent="primary" onClick={saveConfirmedAppointment}>
-          Reserved
-        </Button>
       </ReservedModal>
     </div>
   );
