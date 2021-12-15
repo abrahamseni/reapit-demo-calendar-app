@@ -35,8 +35,7 @@ const CalendarModalBody: React.FC<CalendarProps> = ({
         selectable
         localizer={localizer}
         defaultDate={new Date(Date.now())}
-        defaultView={Views.MONTH}
-        style={{ height: "100%" }}
+        defaultView={Views.WEEK}
         views={["month", "week", "day"]}
         events={events}
         step={30}
