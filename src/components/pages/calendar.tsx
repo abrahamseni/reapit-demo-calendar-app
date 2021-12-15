@@ -71,7 +71,9 @@ const Calendar: React.FC<Props> = () => {
         onChange={(event) => setAddress(event.target.value)}
       />
       <Space height="16px" />
-      {renderTable()}
+      <div className="el-flex el-flex-column el-flex-justify-start">
+        {renderTable()}
+      </div>
     </SnackProvider>
   );
 };
