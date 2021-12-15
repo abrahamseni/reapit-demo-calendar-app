@@ -27,6 +27,3 @@ yarn-error.log*
 # cypress
 /*/*/*-started
 /*/*/*-examples
-
-# reapit
-src/reapit.config.json
