@@ -1,4 +1,3 @@
-import * as React from "react";
 import { ReapitConnectSession } from "@reapit/connect-session";
 import { AppointmentModelPagedResult } from "@reapit/foundations-ts-definitions";
 import { URLS } from "../constants/api";

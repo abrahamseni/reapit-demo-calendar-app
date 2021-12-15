@@ -31,35 +31,6 @@ export const getAllProperties = async (
   }
 };
 
-export const getPropertiesByAddress = async (
-  session: ReapitConnectSession,
-  pageNumber: number,
-  address: string
-): Promise<PropertyModelPagedResult | undefined> => {
-  try {
-    const response = await fetch(
-      `${window.reapit.config.platformApiUrl}${URLS.PROPERTIES}/?pageNumber=${pageNumber}&address=${address}`,
-      {
-        method: "GET",
-        headers: {
-          ...BASE_HEADERS,
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    );
-
-    if (response) {
-      const responseJson: Promise<PropertyModelPagedResult | undefined> =
-        response.json();
-      return responseJson;
-    }
-
-    throw new Error("No response returned by API");
-  } catch (err) {
-    console.error("Error fetching Properties", err);
-  }
-};
-
 export const useGetPropertiesByAddress = (
   session: ReapitConnectSession | null,
   options: {
