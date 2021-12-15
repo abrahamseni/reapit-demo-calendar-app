@@ -6,6 +6,7 @@ import "@reapit/elements/dist/index.css";
 import { QueryClientProvider, QueryClient } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-datepicker/dist/react-datepicker.css";
 
 const App = () => {
   return (
