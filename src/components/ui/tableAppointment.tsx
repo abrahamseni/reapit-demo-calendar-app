@@ -164,7 +164,6 @@ const TableAppointment = (props: PropertyModel) => {
             property={props}
             reservedEvent={reservedEvent}
             closeReservedModal={closeReservedModal}
-            type={reservedEvent.resource.type}
           />
         )}
       </ReservedModal>
