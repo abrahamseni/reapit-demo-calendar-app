@@ -5,6 +5,7 @@ import {
   SearchableDropdownSearchLabel,
   SearchableDropdown,
   Button,
+  Subtitle,
 } from "@reapit/elements";
 import add from "date-fns/add";
 import { Space } from "./space";
@@ -19,15 +20,22 @@ import {
   usePostNewAppointment,
   useEditAppointment,
 } from "../../platform-api/appointments";
+import DatePicker from "react-datepicker";
 // import { useReapitConnect } from "@reapit/connect-session";
 // import { reapitConnectBrowserSession } from "../../core/connect-session";
+import { startOfWeek, compareAsc } from "date-fns";
 
 interface AppointmentModalProps {
   property: PropertyModel;
   reservedEvent: Event;
   closeReservedModal: () => void;
-  type: "new" | "edit";
+  type: "new" | "edit" | "old";
 }
+
+type EditDateTime = {
+  start: Date;
+  end: Date;
+};
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
   property,
@@ -44,6 +52,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   >();
   const [reservedEventViewType, setReservedEventViewType] = React.useState<
     string | undefined
+  >();
+
+  const [editDateTime, setEditDateTime] = React.useState<
+    EditDateTime | undefined
   >();
 
   const saveConfirmedAppointment = () => {
@@ -96,65 +108,102 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     if (!connectSession) return;
 
     const editedEvent = {
-      start: "2021-12-24T12:30:02.0000000Z",
-      end: "2021-12-24T13:30:02.0000000Z",
-      followUpOn: "2021-12-31",
-      typeId: "VW",
-      description: "Meet landlord at the property to get the key.",
-      propertyId: "OXF190022",
-      organiserId: "JAS",
-      cancelled: false,
-      negotiatorIds: ["JAS"],
-      officeIds: ["OXF", "SOL"],
-      attendee: {
-        id: "OXF20001",
-        type: "applicant",
-        confirmed: false,
-      },
-      accompanied: true,
-      virtual: null,
-      negotiatorConfirmed: true,
-      attendeeConfirmed: true,
-      propertyConfirmed: true,
-      followUp: {
-        responseId: "OXF190022",
-        notes: "Meet at the property.",
-      },
-      recurrence: null,
-      metadata: {
-        CustomField1: "CustomValue1",
-        CustomField2: true,
-      },
+      start: new Date(2021, 12, 19),
+      end: add(new Date(2021, 12, 19), { minutes: 30 }),
+      followUpOn: formatDate(new Date(2022, 2, 2), "yyyy-MM-dd"),
+      typeId: reservedEventViewType ?? "VW",
+      description: reservedEventTitle ?? "",
+      // propertyId: "OXF190022",
+      // organiserId: "JAS",
+      // cancelled: false,
+      // negotiatorIds: ["JAS"],
+      // officeIds: ["OXF", "SOL"],
+      // attendee: {
+      //   id: "OXF20001",
+      //   type: "applicant",
+      //   confirmed: false,
+      // },
+      // accompanied: true,
+      // virtual: null,
+      // negotiatorConfirmed: true,
+      // attendeeConfirmed: true,
+      // propertyConfirmed: true,
+      // followUp: {
+      //   responseId: "OXF190022",
+      //   notes: "Meet at the property.",
+      // },
+      // recurrence: null,
+      // metadata: {
+      //   CustomField1: "CustomValue1",
+      //   CustomField2: true,
+      // },
     };
-    await editAppointment.mutateAsync({
-      session: connectSession,
-      body: editedEvent,
-      etag: reservedEvent.resource.tag,
-      id: reservedEvent.resource.id,
-    });
+    await editAppointment.mutateAsync(
+      {
+        session: connectSession,
+        body: editedEvent,
+        etag: `"${reservedEvent.resource.tag}"`,
+        id: reservedEvent.resource.id,
+      },
+      {
+        onSuccess: (data) => console.log("success", data),
+      }
+    );
+    closeReservedModal();
+  };
+
+  const renderSelectTime = () => {
+    if (reservedEvent.start) {
+      if (reservedEvent.resource.type !== "edit") {
+        return (
+          <>
+            <BodyText hasGreyText>
+              Date: {formatDate(reservedEvent.start, "MMMM dd, yyyy")}
+            </BodyText>
+            <BodyText hasGreyText>
+              From: {formatDate(reservedEvent.start, "HH:mm a")} -{" "}
+              {formatDate(reservedEvent.end ?? "", "HH:mm a")}
+            </BodyText>
+          </>
+        );
+      } else {
+        return (
+          <>
+            <DatePicker
+              onChange={(date: Date) =>
+                setEditDateTime({
+                  start: date,
+                  end: date,
+                })
+              }
+              selected={reservedEvent.start}
+              showTimeSelect
+              dateFormat="MMMM d, yyyy h:mm aa"
+            />
+            <BodyText hasGreyText>
+              Date: {formatDate(reservedEvent.start, "MMMM dd, yyyy")}
+            </BodyText>
+            <BodyText hasGreyText>
+              From: {formatDate(reservedEvent.start, "HH:mm a")} -{" "}
+              {formatDate(reservedEvent.end ?? "", "HH:mm a")}
+            </BodyText>
+          </>
+        );
+      }
+    }
   };
 
   return (
     <>
-      {reservedEvent.start && (
-        <>
-          <BodyText hasBoldText>{reservedEvent?.title}</BodyText>
-          <BodyText hasGreyText>
-            Date: {formatDate(reservedEvent.start, "MMMM dd, yyyy")}
-          </BodyText>
-          <BodyText hasGreyText>
-            From: {formatDate(reservedEvent.start, "HH:mm a")} -{" "}
-            {formatDate(reservedEvent.end ?? "", "HH:mm a")}
-          </BodyText>
-        </>
-      )}
+      <Subtitle hasBoldText>{reservedEvent?.title}</Subtitle>
+      {renderSelectTime()}
       <Space height="12px" />
       <InputGroup
         label="Appointment Title"
         type="text"
         icon="houseInfographic"
         onChange={(event) => setReservedEventTitle(event.target.value)}
-        value={reservedEvent.title as string}
+        defaultValue={reservedEvent.title as string}
       />
       <Space height="12px" />
       <SearchableDropdownSearchLabel>
@@ -175,21 +224,28 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         onChange={(event) => setReservedEventViewType(event.target.value)}
       />
       <Space height="24px" />
-      <Button intent="neutral" onClick={closeReservedModal}>
-        Cancel
-      </Button>
-      <Button
-        intent="primary"
-        onClick={() => {
-          if (type === "new") {
-            saveConfirmedAppointment();
-          } else {
-            saveEditReservedAppointment();
-          }
-        }}
-      >
-        {type === "edit" ? "Confirm Edit" : "Reserved"}
-      </Button>
+      {reservedEvent.start &&
+      compareAsc(new Date(reservedEvent.start), Date.now()) === -1 ? (
+        ""
+      ) : (
+        <>
+          <Button intent="neutral" onClick={closeReservedModal}>
+            Cancel
+          </Button>
+          <Button
+            intent="primary"
+            onClick={() => {
+              if (type === "new") {
+                saveConfirmedAppointment();
+              } else {
+                saveEditReservedAppointment();
+              }
+            }}
+          >
+            {type === "edit" ? "Confirm Edit" : "Reserved"}
+          </Button>
+        </>
+      )}
     </>
   );
 };

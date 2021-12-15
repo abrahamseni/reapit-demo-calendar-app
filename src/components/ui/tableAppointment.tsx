@@ -45,7 +45,6 @@ const TableAppointment = (props: PropertyModel) => {
     closeModal: closeReservedModal,
   } = useModal("root");
   const { error: snackError } = useSnack();
-  // const appointmentConfigTypes = useGetAppointmentConfigType();
 
   React.useEffect(() => {
     if (schedule) {
@@ -57,7 +56,11 @@ const TableAppointment = (props: PropertyModel) => {
           resource: {
             tag: s._eTag,
             id: s.id,
-            type: "edit",
+            type:
+              compareAsc(new Date(s.start ?? ""), Date.now()) === -1
+                ? "old"
+                : "edit",
+            viewType: s.typeId,
           },
         };
       });
@@ -98,7 +101,7 @@ const TableAppointment = (props: PropertyModel) => {
   return (
     <div>
       {negotiatorFetchStatus === "loading" ? (
-        <Loader title="Loading..." />
+        <Loader label="Fetching negotiator data" />
       ) : negotiatorFetchStatus === "error" ? (
         <BodyText>Error getting negotiator data</BodyText>
       ) : (
@@ -134,7 +137,7 @@ const TableAppointment = (props: PropertyModel) => {
       )}
       <CalendarModal title="Select Appointment Time">
         {scheduleFetchStatus === "loading" ? (
-          <Loader label="Loading..." />
+          <Loader label="Fetching Schedule..." />
         ) : scheduleFetchStatus === "error" ? (
           <BodyText>Error fetching Calendar</BodyText>
         ) : (
@@ -149,7 +152,11 @@ const TableAppointment = (props: PropertyModel) => {
       </CalendarModal>
       <ReservedModal
         title={`${
-          reservedEvent?.resource.type === "edit" ? "Edit" : "Make New"
+          reservedEvent?.resource.type === "edit"
+            ? "Edit"
+            : reservedEvent?.resource.type === "new"
+            ? "Make New"
+            : "Past"
         } Appointment for ${props.address?.buildingName}`}
       >
         {reservedEvent && reservedEvent.resource.type && (
