@@ -23,13 +23,12 @@ import {
 import DatePicker from "react-datepicker";
 // import { useReapitConnect } from "@reapit/connect-session";
 // import { reapitConnectBrowserSession } from "../../core/connect-session";
-import { startOfWeek, compareAsc } from "date-fns";
+import { compareAsc } from "date-fns";
 
 interface AppointmentModalProps {
   property: PropertyModel;
   reservedEvent: Event;
   closeReservedModal: () => void;
-  type: "new" | "edit" | "old";
 }
 
 type EditDateTime = {
@@ -41,7 +40,6 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   property,
   reservedEvent,
   closeReservedModal,
-  type,
 }) => {
   const { connectSession, appointmentConfigTypes } =
     useGetAppointmentConfigType();
@@ -53,10 +51,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const [reservedEventViewType, setReservedEventViewType] = React.useState<
     string | undefined
   >();
-
-  const [editDateTime, setEditDateTime] = React.useState<
-    EditDateTime | undefined
-  >();
+  const [editEvent, setEditEvent] = React.useState<EditDateTime | undefined>();
 
   const saveConfirmedAppointment = () => {
     if (!connectSession) return;
@@ -104,13 +99,16 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   };
 
   const saveEditReservedAppointment = async () => {
-    console.log(reservedEvent);
-    if (!connectSession) return;
+    console.log(editEvent);
+    if (!connectSession || !editEvent) return;
 
     const editedEvent = {
-      start: new Date(2021, 12, 19),
-      end: add(new Date(2021, 12, 19), { minutes: 30 }),
-      followUpOn: formatDate(new Date(2022, 2, 2), "yyyy-MM-dd"),
+      start: editEvent?.start,
+      end: editEvent?.end,
+      followUpOn: formatDate(
+        add(new Date(editEvent.start), { weeks: 2 }),
+        "yyyy-MM-dd"
+      ),
       typeId: reservedEventViewType ?? "VW",
       description: reservedEventTitle ?? "",
       // propertyId: "OXF190022",
@@ -142,7 +140,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       {
         session: connectSession,
         body: editedEvent,
-        etag: `"${reservedEvent.resource.tag}"`,
+        etag: reservedEvent.resource.tag,
         id: reservedEvent.resource.id,
       },
       {
@@ -150,6 +148,13 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       }
     );
     closeReservedModal();
+  };
+
+  const filterPassedTime = (time: Date) => {
+    const currentDate = new Date();
+    const selectedDate = new Date(time);
+
+    return currentDate.getTime() < selectedDate.getTime();
   };
 
   const renderSelectTime = () => {
@@ -169,17 +174,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       } else {
         return (
           <>
-            <DatePicker
-              onChange={(date: Date) =>
-                setEditDateTime({
-                  start: date,
-                  end: date,
-                })
-              }
-              selected={reservedEvent.start}
-              showTimeSelect
-              dateFormat="MMMM d, yyyy h:mm aa"
-            />
+            <BodyText hasBoldText>Schedule:</BodyText>
             <BodyText hasGreyText>
               Date: {formatDate(reservedEvent.start, "MMMM dd, yyyy")}
             </BodyText>
@@ -187,6 +182,19 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               From: {formatDate(reservedEvent.start, "HH:mm a")} -{" "}
               {formatDate(reservedEvent.end ?? "", "HH:mm a")}
             </BodyText>
+            <BodyText hasBoldText>Change Date and Time:</BodyText>
+            <DatePicker
+              onChange={(date: Date) =>
+                setEditEvent({
+                  start: date,
+                  end: add(date, { minutes: 30 }),
+                })
+              }
+              selected={editEvent ? editEvent.start : reservedEvent.start}
+              showTimeSelect
+              dateFormat="MMMM d, yyyy h:mm aa"
+              filterTime={filterPassedTime}
+            />
           </>
         );
       }
@@ -195,7 +203,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
   return (
     <>
-      <Subtitle hasBoldText>{reservedEvent?.title}</Subtitle>
+      <Subtitle hasBoldText>Title: {reservedEvent?.title}</Subtitle>
       {renderSelectTime()}
       <Space height="12px" />
       <InputGroup
@@ -204,6 +212,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         icon="houseInfographic"
         onChange={(event) => setReservedEventTitle(event.target.value)}
         defaultValue={reservedEvent.title as string}
+        disabled={reservedEvent.resource.type === "old"}
       />
       <Space height="12px" />
       <SearchableDropdownSearchLabel>
@@ -222,6 +231,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         getResultValue={(result) => (result.id ? result.id : "")}
         getResultLabel={(result) => (result.value ? result.value : "")}
         onChange={(event) => setReservedEventViewType(event.target.value)}
+        disabled={reservedEvent.resource.type === "old"}
       />
       <Space height="24px" />
       {reservedEvent.start &&
@@ -235,14 +245,16 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           <Button
             intent="primary"
             onClick={() => {
-              if (type === "new") {
+              if (reservedEvent.resource.type === "new") {
                 saveConfirmedAppointment();
               } else {
                 saveEditReservedAppointment();
               }
             }}
           >
-            {type === "edit" ? "Confirm Edit" : "Reserved"}
+            {reservedEvent.resource.type === "edit"
+              ? "Confirm Edit"
+              : "Reserved"}
           </Button>
         </>
       )}
