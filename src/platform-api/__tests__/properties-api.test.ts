@@ -3,20 +3,26 @@ import { mockBrowserSession } from "../__mocks__/session";
 import { getAllProperties } from "../properties";
 
 const mockedFetch = jest.spyOn(window, "fetch");
-const mockConfigurationAppointments = [
+const mockPropertyAppointments = [
   {
     pageNumber: 8,
     pageSize: 25,
+    _embedded: [
+      {
+        marketingMode: "sellingAndLetting",
+        currency: "GBP",
+      },
+    ],
   },
 ] as PropertyModelPagedResult[];
 
 describe("getAllProperties", () => {
   it("should return a response from the config service", async () => {
     mockedFetch.mockReturnValueOnce({
-      json: jest.fn(() => mockConfigurationAppointments),
+      json: jest.fn(() => mockPropertyAppointments),
     } as any);
     expect(await getAllProperties(mockBrowserSession)).toEqual(
-      mockConfigurationAppointments
+      mockPropertyAppointments
     );
     expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
