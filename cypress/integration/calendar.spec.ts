@@ -6,6 +6,12 @@ describe("Calendar page", () => {
   });
 
   it("should show calendar title", () => {
-    cy.get("h1").contains("Calendar");
+    cy.get("#signInFormUsername").type(`abraham@softwareseni.com`, {
+      force: true,
+    });
+    cy.get("#signInFormPassword").type(`Abraham@softwareseni221121{enter}`, {
+      force: true,
+    });
+    // cy.get("h1").contains("Calendar");
   });
 });
