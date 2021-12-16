@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  Subtitle,
   Pagination,
   Snack,
   SnackProvider,
@@ -14,6 +15,7 @@ import { useReapitConnect } from "@reapit/connect-session";
 import { reapitConnectBrowserSession } from "../../core/connect-session";
 import { createTableRows } from "../../utils/helpers";
 import { Space } from "../utils/space";
+import { searchBox } from "./__styles__/styles";
 
 interface Props {}
 
@@ -47,27 +49,32 @@ const Calendar: React.FC<Props> = () => {
       );
     } else {
       return (
-        <>
+        <div className="el-flex el-flex-column">
           <Table rows={rows} />
+          <Space height="8px" />
           <Pagination
             callback={setPageNumber}
             currentPage={pageNumber}
             numberPages={data?.pageSize!}
           />
-        </>
+        </div>
       );
     }
   };
 
   return (
     <SnackProvider>
-      <Title>Calendar App</Title>
-      <InputGroup
-        label="Search by Address"
-        type="search"
-        placeholder="London"
-        onChange={(event) => setAddress(event.target.value)}
-      />
+      <Title>AppointIt</Title>
+      <Subtitle>Search Listing</Subtitle>
+      <div className={`el-flex el-p6 ${searchBox}`}>
+        <InputGroup
+          label="Search by Address"
+          type="search"
+          placeholder="London"
+          onChange={(event) => setAddress(event.target.value)}
+          className="el-flex1 el-mr3"
+        />
+      </div>
       <Space height="16px" />
       <div className="el-flex el-flex-column el-flex-justify-start">
         {renderTable()}

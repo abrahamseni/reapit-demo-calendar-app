@@ -1,4 +1,4 @@
-import { css } from '@linaria/core'
+import { css } from "@linaria/core";
 
 export const loginContainer = css`
   min-width: 100vw;
@@ -12,7 +12,7 @@ export const loginContainer = css`
   @media screen and (max-width: 768px) {
     flex-direction: column-reverse;
   }
-`
+`;
 
 export const wrapper = css`
   background-color: #fff;
@@ -49,7 +49,7 @@ export const wrapper = css`
   @media screen and (min-width: 1200px) {
     padding: 0 3rem;
   }
-`
+`;
 
 export const imageContainer = css`
   background-color: #fff;
@@ -60,13 +60,13 @@ export const imageContainer = css`
   @media screen and (max-width: 768px) {
     display: none;
   }
-`
+`;
 
 export const loginLevel = css`
   flex-direction: column;
-`
+`;
 
-export const loginImageVisible = css``
+export const loginImageVisible = css``;
 
 export const loginImage = css`
   transition: opacity 1s ease-in-out;
@@ -78,10 +78,14 @@ export const loginImage = css`
   &.${loginImageVisible} {
     opacity: 1;
   }
-`
+`;
 
 export const loginImages = css`
   height: 100%;
   width: auto;
   position: relative;
-`
+`;
+
+export const searchBox = css`
+  background-color: var(--intent-secondary-light);
+`;
