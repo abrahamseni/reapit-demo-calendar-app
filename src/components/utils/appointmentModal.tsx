@@ -14,7 +14,7 @@ import {
   PropertyModel,
 } from "@reapit/foundations-ts-definitions";
 import { formatDate } from "../../utils/formats";
-import { useGetAppointmentConfigType } from "../../utils/hooks/api";
+import { useGetAppointmentConfigType } from "../../utils/hooks/session";
 import { Event } from "react-big-calendar";
 import {
   usePostNewAppointment,

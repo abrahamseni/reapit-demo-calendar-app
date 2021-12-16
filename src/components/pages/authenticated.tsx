@@ -5,7 +5,7 @@ import { Title, Subtitle, BodyText } from "@reapit/elements";
 // import { configurationAppointmentsApiService } from "../../platform-api/configuration-api";
 // import { ListItemModel } from "@reapit/foundations-ts-definitions";
 import { Link } from "react-router-dom";
-import { useGetAppointmentConfigType } from "../../utils/hooks/api";
+import { useGetAppointmentConfigType } from "../../utils/hooks/session";
 
 export type AuthenticatedProps = {};
 
