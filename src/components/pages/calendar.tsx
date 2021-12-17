@@ -66,7 +66,9 @@ const Calendar: React.FC<Props> = () => {
     <SnackProvider>
       <Title>AppointIt</Title>
       <Subtitle>Search Listing</Subtitle>
-      <div className={`el-flex el-p6 ${searchBox}`}>
+      <div
+        className={`el-flex el-p6 el-border-radius el-box-shadow ${searchBox}`}
+      >
         <InputGroup
           label="Search by Address"
           type="search"
